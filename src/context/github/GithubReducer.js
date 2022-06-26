@@ -8,6 +8,11 @@ const githubReducer = (state,action) => {
                 users: action.payLoad,
                 loading: false,
             }
+        case 'SET_LOADING':
+            return {
+                ...state,
+                loading: true,
+            }
         default:
             return state
     }
