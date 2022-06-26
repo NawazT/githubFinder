@@ -1,6 +1,7 @@
 //for managing multiple states accross the app global context is used
 //importing creat context hook
-import { createContext,useState } from "react"
+import { createContext,useReducer } from "react"
+import githubReducer from "./GithubReducer"
 
 //variable to store the context
 const GithubContext = createContext()
@@ -12,8 +13,15 @@ const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN
 //provider function for conataining the states and the shared data
 
 export const GithubProvider = ({children}) => {
-    const [users, setUsers] = useState([])
-    const [loading, setLoading] = useState(true)
+    //create a variable to use the reducer inside the provider function
+    // we have to create an initial state also
+    const initialState = {
+        users: [],
+        loading: true
+    }
+
+    //from the reducer we get state and dispatch, defines what changes to make in which state
+    const [state, dispatch] = useReducer(githubReducer,initialState)
 
     const fetchUsers = async () => {
         const response = await fetch(`${GITHUB_URL}/users`, {
@@ -23,15 +31,18 @@ export const GithubProvider = ({children}) => {
         }) 
 
         const data = await response.json()
-
-        setUsers(data)
-        setLoading(false)
+        
+        //instead of set we want to use dispatch, to dispatch an action to our reducer
+        dispatch ({
+            type:'GET_USERS',//dispatch this type to the reducer
+            payLoad: data, //data from the API
+        })
     }
 
     //return the children with values equals the states
     return <GithubContext.Provider value={{
-        users,
-        loading,
+        users: state.users,
+        loading: state.loading,
         fetchUsers
     }}>
         {children}
