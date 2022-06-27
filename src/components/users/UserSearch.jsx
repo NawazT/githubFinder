@@ -1,9 +1,11 @@
 import React from 'react'
 import { useState, useContext } from 'react'
 import GithubContext from '../../context/github/GithubContext'
+import AlertContext from '../../context/alert/AlertContext'
 
 function UserSearch()  {
-    const { users, searchUsers, clearUsers } =useContext(GithubContext)
+    const { users, searchUsers, clearUsers } = useContext(GithubContext)
+    const { setAlert } = useContext(AlertContext)
 
     const [text,setText] = useState('')
 
@@ -15,7 +17,7 @@ function UserSearch()  {
 
         if(text === '')
         {
-            alert('Type username to be searched')
+            setAlert('Username can not be empty','error')
         }
         else{
             //search users
