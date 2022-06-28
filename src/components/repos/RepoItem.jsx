@@ -42,7 +42,7 @@ function RepoItem ({repo}) {
     </div>
 }
 
-RepoItem.propType = {
+RepoItem.propTypes = {
     repo: PropTypes.object.isRequired
 }
 
