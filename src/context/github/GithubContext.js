@@ -17,6 +17,7 @@ export const GithubProvider = ({children}) => {
     // we have to create an initial state also
     const initialState = {
         users: [],
+        user: {},
         loading: false
     }
 
@@ -48,6 +49,32 @@ export const GithubProvider = ({children}) => {
         })
     }
 
+    //get single user
+    const getUser = async (login) => {
+        setLoading()
+
+        //end point we want to hit
+        const response = await fetch(`${GITHUB_URL}/users/${login}`, {
+            headers: {
+                Authorization: `token ${GITHUB_TOKEN}`,
+            },
+        }) 
+
+        if(response.status === 404 ) {
+            window.location = '/notfound'
+        } 
+        else {
+
+            const data = await response.json()
+        
+            //instead of set we want to use dispatch, to dispatch an action to our reducer
+            dispatch ({
+                type:'GET_USER',//dispatch this type to the reducer
+                payLoad: data, //data from the API
+            })
+        }    
+    }
+
     const setLoading = () => dispatch({
         type: 'SET_LOADING',
     })
@@ -59,8 +86,10 @@ export const GithubProvider = ({children}) => {
     return <GithubContext.Provider value={{
         users: state.users,
         loading: state.loading,
+        user: state.user,
         searchUsers,
-        clearUsers
+        clearUsers,
+        getUser,
     }}>
         {children}
     </GithubContext.Provider>
