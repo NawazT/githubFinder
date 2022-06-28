@@ -27,29 +27,7 @@ export const GithubProvider = ({children}) => {
 
     //initial users for testing purpose
 
-    //now we dont want fetch but search users
-    const searchUsers = async (text) => {
-        setLoading()
-
-        const  params = new URLSearchParams({
-            q:text,
-        })
-
-        const response = await fetch(`${GITHUB_URL}/search/users?${params}`, {
-            headers: {
-                Authorization: `token ${GITHUB_TOKEN}`,
-            },
-        }) 
-
-        const { items } = await response.json()
-        
-        //instead of set we want to use dispatch, to dispatch an action to our reducer
-        dispatch ({
-            type:'GET_USERS',//dispatch this type to the reducer
-            payLoad: items, //data from the API
-        })
-    }
-
+   
     //get single user
     const getUser = async (login) => {
         setLoading()
@@ -109,11 +87,8 @@ export const GithubProvider = ({children}) => {
     })
     //return the children with values equals the states
     return <GithubContext.Provider value={{
-        users: state.users,
-        loading: state.loading,
-        user: state.user,
-        repos: state.repos,
-        searchUsers,
+        ...state,
+        dispatch,
         clearUsers,
         getUser,
         getUserRepos,
