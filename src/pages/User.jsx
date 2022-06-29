@@ -1,22 +1,25 @@
-import React from 'react'
-import {FaCodepen, FaStore, FaUserFriends, FaUsers} from 'react-icons/fa'
-import GithubContext from '../context/github/GithubContext'
-import { useContext, useEffect } from 'react' 
-import { useParams,Link } from 'react-router-dom'
+import { FaCodepen, FaStore, FaUserFriends, FaUsers } from 'react-icons/fa'
+import { useEffect, useContext } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import Spinner from '../components/layout/Spinner'
 import RepoList from '../components/repos/RepoList'
+import GithubContext from '../context/github/GithubContext'
+import { getUserAndRepos } from '../context/github/GithubActions'
 
 function User() {
+  const { user, loading, repos, dispatch } = useContext(GithubContext)
 
-  const {getUser, user, loading, getUserRepos, repos} = useContext(GithubContext);
-
-const params = useParams()
+  const params = useParams()
 
   useEffect(() => {
-    getUser(params.login)
-    getUserRepos(params.login)
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [] ) 
+    dispatch({ type: 'SET_LOADING' })
+    const getUserData = async () => {
+      const userData = await getUserAndRepos(params.login)
+      dispatch({ type: 'GET_USER_AND_REPOS', payload: userData })
+    }
+
+    getUserData()
+  }, [dispatch, params.login])
 
   const {
     name,
@@ -35,15 +38,21 @@ const params = useParams()
     hireable,
   } = user
 
-  if(loading){
-    return (
-      <Spinner/>
-    )
+  if (loading) {
+    return <Spinner />
   }
 
   // NOTE: check for valid url to users website
 
   const websiteUrl = blog?.startsWith('http') ? blog : 'https://' + blog
+
+  // NOTE: code here has been fixed so that stats no longer show scroll bar on
+  // mobile / small devices
+  // https://www.udemy.com/course/react-front-to-back-2022/learn/lecture/29768968#questions/16902278
+
+  // NOTE: if you are having problems with the name and login showing at the top
+  // of the image then you need the className='flex-grow-0' on the <p> tag
+  // default styling on <p> in daisyUI now has flex-grow-1
 
   return (
     <>
@@ -90,40 +99,37 @@ const params = useParams()
             </div>
 
             <div className='w-full rounded-lg shadow-md bg-base-100 stats'>
-                <div className='grid grid-cols-1 md:grid-cols-3'>
-                  {location && (
-                    <div className='stat'>
-                      <div className='stat-title text-md'>Location</div>
-                      <div className='text-lg stat-value'>{location}</div>
-                    </div>
-                  )}
-                  {blog && (
-                    <div className='stat'>
-                      <div className='stat-title text-md'>Website</div>
-                      <div className='text-lg stat-value'>
-                        <a href={websiteUrl} target='_blank' rel='noreferrer'>
-                          {websiteUrl}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {twitter_username && (
-                    <div className='stat'>
-                      <div className='stat-title text-md'>Twitter</div>
-                      <div className='text-lg stat-value'>
-                        <a
-                              href={`https://twitter.com/${twitter_username}`}
-                          target='_blank'
-                          rel='noreferrer'
-                        >
-                          {twitter_username}
-                        </a>
-                      </div>
-                    </div>
-                  )}
+              {location && (
+                <div className='stat'>
+                  <div className='stat-title text-md'>Location</div>
+                  <div className='text-lg stat-value'>{location}</div>
+                </div>
+              )}
+              {blog && (
+                <div className='stat'>
+                  <div className='stat-title text-md'>Website</div>
+                  <div className='text-lg stat-value'>
+                    <a href={websiteUrl} target='_blank' rel='noreferrer'>
+                      {websiteUrl}
+                    </a>
                   </div>
                 </div>
-              
+              )}
+              {twitter_username && (
+                <div className='stat'>
+                  <div className='stat-title text-md'>Twitter</div>
+                  <div className='text-lg stat-value'>
+                    <a
+                      href={`https://twitter.com/${twitter_username}`}
+                      target='_blank'
+                      rel='noreferrer'
+                    >
+                      {twitter_username}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
